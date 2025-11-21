@@ -1,0 +1,31 @@
+{
+  "name": "unearthed-dinos",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start:server": "npm --prefix server run start",
+    "dev:all": "concurrently -n FRONT,API -c magenta,cyan \"npm run dev\" \"npm run start:server\"",
+    "vercel-build": "npm run build"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "framer-motion": "^11.0.0",
+    "lru-cache": "^11.1.0",
+    "lucide-react": "^0.472.0",
+    "node-fetch": "^2.7.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.8.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.0.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^7.1.3"
+  }
+}
