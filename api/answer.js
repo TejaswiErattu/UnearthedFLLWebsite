@@ -71,6 +71,32 @@ function clip(str = '', max = 1500) {
   return str.length > max ? str.slice(0, max) : str;
 }
 
+function getBuiltinFLLAnswer(q = '') {
+  const query = q.toLowerCase();
+  
+  if (/what.*is.*fll|first.*lego.*league|fll.*stand.*for/.test(query)) {
+    return "FIRST LEGO League (FLL) is an international youth robotics program that blends LEGO robotics with research and Core Values. Teams design, build and program a robot for the Robot Game and present an Innovation Project; events emphasize teamwork, inclusion and fun.";
+  }
+  
+  if (/core.*values|fll.*values/.test(query)) {
+    return "FLL Core Values are: Discovery (we explore new skills and ideas), Innovation (we use creativity and persistence to solve problems), Impact (we apply what we learn to improve our world), Inclusion (we respect each other and embrace our differences), Teamwork (we are stronger when we work together), and Fun (we enjoy and celebrate what we do).";
+  }
+  
+  if (/robot.*game|missions|points/.test(query)) {
+    return "The Robot Game involves programming an autonomous robot to complete missions on a themed field. Teams have 2.5 minutes per match. Strategy tip: Focus on reliable missions first, then go for higher-point challenges. Consistency beats complexity!";
+  }
+  
+  if (/innovation.*project|research/.test(query)) {
+    return "The Innovation Project requires teams to identify a real-world problem related to the season theme, research it thoroughly, develop an innovative solution, and share their findings with others. It's about making a positive impact!";
+  }
+  
+  if (/judging|presentation/.test(query)) {
+    return "FLL judging covers three areas: Robot Design (mechanical design, programming, strategy), Core Values (teamwork demonstration, inclusion, fun), and Innovation Project (research quality, innovative solution, presentation skills). Be prepared to explain your thinking process!";
+  }
+  
+  return null;
+}
+
 async function llmRewrite({ question, context }) {
   if (!OPENAI_API_KEY) return null;
   try {
@@ -195,7 +221,17 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2) If we didn't find strong on-site content, ask the user before web.
+    // 2) Try some built-in FLL knowledge before asking for web search
+    const builtinAnswer = getBuiltinFLLAnswer(q);
+    if (builtinAnswer) {
+      return res.json({
+        used: 'builtin',
+        answer: builtinAnswer,
+        sources: [{ title: "FLL Knowledge", url: "#" }]
+      });
+    }
+
+    // 3) If we didn't find strong on-site content, ask the user before web.
     if (!allowWeb) {
       return res.json({
         used: 'none',
@@ -205,9 +241,20 @@ export default async function handler(req, res) {
       });
     }
 
-    // 3) Web fallback (only if allowWeb=true)
+    // 4) Web fallback (only if allowWeb=true)
     const search = await webSearch(q);
-    if (search.error) return res.status(502).json({ error: search.error });
+    if (search.error) {
+      // Provide a helpful response instead of an error
+      const helpfulMessage = search.error.includes('Missing GOOGLE_CSE_KEY') 
+        ? "I can only search this website right now. The web search feature requires API configuration. Try asking about our team, robot, outreach activities, or FLL in general!"
+        : `Search temporarily unavailable: ${search.error}`;
+      
+      return res.json({ 
+        used: 'none', 
+        answer: helpfulMessage, 
+        sources: [] 
+      });
+    }
 
     const top = search.results.slice(0, 2);
     if (!top.length) {
