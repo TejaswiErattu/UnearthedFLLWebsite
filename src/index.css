@@ -5,22 +5,34 @@
 html, body, #root { height: 100%; }
 body { margin: 0; }
 
-/* Prevent automatic focus scrolling */
+/* Prevent unwanted scrolling behaviors */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto; /* Changed from smooth to auto */
+  overflow-x: hidden;
 }
 
 /* Prevent inputs from scrolling page on mobile */
-input, textarea, select {
+input, textarea, select, button {
   scroll-margin-top: 100px;
 }
 
-/* Ensure consistent scroll behavior across devices */
-* {
-  scroll-behavior: smooth;
-}
-
-/* Override any automatic scrolling from focus */
+/* Prevent automatic focus scrolling */
 *:focus {
   scroll-margin-top: 100px;
+}
+
+/* Prevent any element from causing page scroll on focus */
+*:focus-visible {
+  scroll-margin-top: 100px;
+}
+
+/* Ensure body doesn't cause scrolling issues */
+body {
+  scroll-behavior: auto;
+  overflow-x: hidden;
+}
+
+/* Prevent smooth scrolling during page load */
+.no-smooth-scroll * {
+  scroll-behavior: auto !important;
 }

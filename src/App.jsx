@@ -107,12 +107,19 @@ function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Scroll to top when route changes
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'instant' // Use instant to avoid smooth scrolling to bottom
-    });
+    // Add a small delay to ensure DOM is fully rendered
+    const timer = setTimeout(() => {
+      // Only scroll to top if we're not already at the top
+      if (window.scrollY > 10) {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'instant'
+        });
+      }
+    }, 50); // 50ms delay
+
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   return null;
@@ -413,7 +420,7 @@ function About() {
       <p className="mt-4 text-[#DCC7A1] max-w-3xl">We are an FLL team exploring engineering through a theme of archaeology — unearthing insights, testing hypothesis, and iterating like field scientists. Our core values: Discovery, Innovation, Impact, Inclusion, Teamwork, and Fun.</p>
       <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
         {team.map((m) => (
-          <motion.div key={m.name} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className={`${palette.card} rounded-2xl p-5 border border-[#4a3a2e]`}>
+          <motion.div key={m.name} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`${palette.card} rounded-2xl p-5 border border-[#4a3a2e]`}>
             <PictureSlot 
               src={m.photo} 
               alt={m.name} 
@@ -863,6 +870,32 @@ function runSelfTests() {
 export default function App() {
   useEffect(() => {
     if (import.meta?.env?.MODE !== "production") runSelfTests();
+    
+    // Add class to disable smooth scrolling temporarily
+    document.documentElement.classList.add('no-smooth-scroll');
+    
+    // Prevent any automatic scrolling on initial load
+    const preventInitialScroll = () => {
+      if (window.scrollY > 0) {
+        window.scrollTo(0, 0);
+      }
+    };
+    
+    // Run immediately and after delays
+    preventInitialScroll();
+    const timer1 = setTimeout(preventInitialScroll, 100);
+    const timer2 = setTimeout(preventInitialScroll, 300);
+    
+    // Remove the no-smooth-scroll class after page is fully loaded
+    const removeNoSmoothScroll = setTimeout(() => {
+      document.documentElement.classList.remove('no-smooth-scroll');
+    }, 1000);
+    
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(removeNoSmoothScroll);
+    };
   }, []);
 
   return (
