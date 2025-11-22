@@ -4,3 +4,23 @@
 
 html, body, #root { height: 100%; }
 body { margin: 0; }
+
+/* Prevent automatic focus scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent inputs from scrolling page on mobile */
+input, textarea, select {
+  scroll-margin-top: 100px;
+}
+
+/* Ensure consistent scroll behavior across devices */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Override any automatic scrolling from focus */
+*:focus {
+  scroll-margin-top: 100px;
+}

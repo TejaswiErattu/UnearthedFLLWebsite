@@ -103,6 +103,21 @@ const palette = {
 /*********************************
  * Utilities & primitives
  *********************************/
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Scroll to top when route changes
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant' // Use instant to avoid smooth scrolling to bottom
+    });
+  }, [pathname]);
+
+  return null;
+}
+
 function useScrollSpy(ids) {
   const [active, setActive] = useState(ids[0]);
   useEffect(() => {
@@ -218,7 +233,10 @@ function scrollToId(id) {
     const header = document.querySelector("header");
     const offset = header ? header.getBoundingClientRect().height + 8 : 80;
     const top = el.getBoundingClientRect().top + window.scrollY - offset;
-    window.scrollTo({ top, behavior: "smooth" });
+    // Only scroll if we're not already at the top of the page
+    if (window.scrollY > 100) {
+      window.scrollTo({ top, behavior: "smooth" });
+    }
   } catch (e) {
     console.warn("scrollToId failed (non-fatal)", e);
   }
@@ -656,7 +674,12 @@ function SmartChatBot() {
   const [input, setInput] = useState("");
   const endRef = useRef(null);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { 
+    // Only scroll the chat area, not the whole page
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" }); 
+    }
+  }, [messages]);
 
   // ---- YES button handler (now INSIDE the component so it sees setMessages) ----
   async function doWebSearch(q) {
@@ -844,6 +867,7 @@ export default function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <Shell>
         <Routes>
           <Route path="/" element={
